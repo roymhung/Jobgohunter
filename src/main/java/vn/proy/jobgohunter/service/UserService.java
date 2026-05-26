@@ -13,9 +13,13 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public void handleCreateUser(User user) {
+    public User handleCreateUser(User user) {
         // Logic to create a user and save to the database
-        this.userRepository.save(user);
+        return this.userRepository.save(user);
     }
 
+    public void handleDeleteUser(Long id) {
+        // Logic to delete a user by ID
+        this.userRepository.deleteById(id);
+    }
 }
