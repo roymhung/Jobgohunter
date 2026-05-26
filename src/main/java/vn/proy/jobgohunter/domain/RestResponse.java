@@ -8,6 +8,8 @@ public class RestResponse<T> {
     private Object message;
     private T data;
 
+    public RestResponse() {}
+
     public RestResponse(int statusCode, String error, Object message, T data) {
         this.statusCode = statusCode;
         this.error = error;

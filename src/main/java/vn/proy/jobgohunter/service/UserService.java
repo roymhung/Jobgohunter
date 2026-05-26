@@ -44,7 +44,7 @@ public class UserService {
         // Logic to update a user by ID
         User currentUser = this.fetchUserById(reqUser.getId());
         if (currentUser != null) {
-            currentUser.setUsername(reqUser.getUsername());
+            currentUser.setName(reqUser.getName());
             currentUser.setEmail(reqUser.getEmail());
             currentUser.setPassword(reqUser.getPassword());
 
