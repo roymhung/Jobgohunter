@@ -53,4 +53,9 @@ public class UserService {
         }
         return currentUser; // or throw an exception if user not found
     }
+
+    public User handleGetUserByUsername(String username) {
+        // Logic to fetch a user by username
+        return this.userRepository.findByEmail(username);
+    }
 }
