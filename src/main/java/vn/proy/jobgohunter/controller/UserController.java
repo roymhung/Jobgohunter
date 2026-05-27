@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +22,11 @@ import vn.proy.jobgohunter.service.error.IdInvalidException;
 public class UserController {
 
     private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // fetch all users
@@ -42,17 +45,18 @@ public class UserController {
 
     @PostMapping("/users")
     public ResponseEntity<User> createNewUser(@RequestBody User postNewUser) {
-
+        String hashPassword = this.passwordEncoder.encode(postNewUser.getPassword());
+        postNewUser.setPassword(hashPassword);
         User newUser = this.userService.handleCreateUser(postNewUser);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
 
     @PutMapping("/users")
-    public User updateUser(@RequestBody User updatedUser) {
+    public ResponseEntity<User> updateUser(@RequestBody User updatedUser) {
 
         User newUdateUser = this.userService.handleUpdateUser(updatedUser);
-        return newUdateUser; // Placeholder return statement
+        return ResponseEntity.ok(newUdateUser); // Placeholder return statement
     }
 
 
