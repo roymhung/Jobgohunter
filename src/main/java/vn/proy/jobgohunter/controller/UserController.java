@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import vn.proy.jobgohunter.domain.User;
 import vn.proy.jobgohunter.service.UserService;
-import vn.proy.jobgohunter.service.error.IdInvalidException;
+import vn.proy.jobgohunter.util.error.IdInvalidException;
 
 
 @RestController
