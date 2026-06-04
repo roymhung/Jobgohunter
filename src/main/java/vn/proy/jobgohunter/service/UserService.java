@@ -1,11 +1,14 @@
 package vn.proy.jobgohunter.service;
 
-import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import vn.proy.jobgohunter.domain.User;
+import vn.proy.jobgohunter.domain.dto.Meta;
+import vn.proy.jobgohunter.domain.dto.ResultPaginationDTO;
 import vn.proy.jobgohunter.repository.UserRepository;
 
 @Service
@@ -35,9 +38,27 @@ public class UserService {
         return null; // or throw an exception if user not found
     }
 
-    public List<User> fetchAllUsers() {
-        // Logic to fetch all users
-        return this.userRepository.findAll();
+    // public List<User> fetchAllUsers(Pageable pageable) {
+    // // Logic to fetch all users
+    // Page<User> pageUser = this.userRepository.findAll(pageable);
+    // return pageUser.getContent();
+    // }
+    public ResultPaginationDTO fetchAllUsers(Pageable pageable) {
+        // Logic to fetch all users with pagination
+        Page<User> pageUser = this.userRepository.findAll(pageable);
+        ResultPaginationDTO resultPaginationDTO = new ResultPaginationDTO();
+        Meta meta = new Meta();
+
+        meta.setPage(pageUser.getNumber() + 1);
+        meta.setPageSize(pageUser.getSize());
+
+        meta.setPages(pageUser.getTotalPages());
+        meta.setTotal(pageUser.getTotalElements());
+
+        resultPaginationDTO.setMeta(meta);
+        resultPaginationDTO.setResult(pageUser.getContent());
+
+        return resultPaginationDTO;
     }
 
     public User handleUpdateUser(User reqUser) {
