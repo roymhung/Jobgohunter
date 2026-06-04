@@ -41,7 +41,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http,
             CustomAuthenticationEntryPoint customAuthenticationEntryPoin) throws Exception {
         http.csrf(c -> c.disable()).cors(Customizer.withDefaults())
-                .authorizeHttpRequests(authz -> authz.requestMatchers("/", "/login").permitAll()
+                .authorizeHttpRequests(authz -> authz.requestMatchers("/", "/api/v1/login").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoin))
@@ -57,8 +57,7 @@ public class SecurityConfiguration {
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter =
-                new JwtGrantedAuthoritiesConverter();
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         grantedAuthoritiesConverter.setAuthorityPrefix("");
         grantedAuthoritiesConverter.setAuthoritiesClaimName("jobgohunter");
 

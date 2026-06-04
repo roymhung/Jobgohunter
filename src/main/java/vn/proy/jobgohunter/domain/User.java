@@ -8,9 +8,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import vn.proy.jobgohunter.util.SecurityUtil;
 import vn.proy.jobgohunter.util.enums.GenderEnum;
 
 @Table(name = "users")
@@ -24,7 +28,11 @@ public class User {
     private Long id;
 
     private String name;
+
+    @NotBlank(message = "Email is not blank")
     private String email;
+
+    @NotBlank(message = "Password is not blank")
     private String password;
 
     private int age;
@@ -40,4 +48,19 @@ public class User {
     private String createdBy;
     private String updatedBy;
 
+    @PrePersist
+    public void handleBeforeCreate() {
+        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+        this.createdAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdate() {
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+        this.updatedAt = Instant.now();
+    }
 }
