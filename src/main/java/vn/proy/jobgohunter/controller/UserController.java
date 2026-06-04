@@ -18,6 +18,7 @@ import com.turkraft.springfilter.boot.Filter;
 import vn.proy.jobgohunter.domain.User;
 import vn.proy.jobgohunter.domain.dto.ResultPaginationDTO;
 import vn.proy.jobgohunter.service.UserService;
+import vn.proy.jobgohunter.util.annotation.ApiMessage;
 import vn.proy.jobgohunter.util.error.IdInvalidException;
 
 
@@ -34,6 +35,7 @@ public class UserController {
 
     // fetch all users
     @GetMapping("/users")
+    @ApiMessage("Fetch all users with pagination and filtering")
     public ResponseEntity<ResultPaginationDTO> getAllUsers(@Filter Specification<User> spec,
             Pageable pageable) {
 
