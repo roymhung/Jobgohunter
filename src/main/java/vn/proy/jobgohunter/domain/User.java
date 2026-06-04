@@ -1,13 +1,22 @@
 package vn.proy.jobgohunter.domain;
 
+import java.time.Instant;
+
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+import vn.proy.jobgohunter.util.enums.GenderEnum;
 
-@Entity
 @Table(name = "users")
+@Entity
+@Getter
+@Setter
 public class User {
 
     @Id
@@ -18,46 +27,17 @@ public class User {
     private String email;
     private String password;
 
-    // Constructors, getters, and setters
+    private int age;
 
-    public User() {}
+    @Enumerated(EnumType.STRING)
+    private GenderEnum gender;
+    private String address;
+    private String refreshToken;
 
-    public User(String name, String email, String password) {
-        this.name = name;
-        this.email = email;
-        this.password = password;
-    }
+    private Instant createdAt;
+    private Instant updatedAt;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    private String createdBy;
+    private String updatedBy;
 
 }
