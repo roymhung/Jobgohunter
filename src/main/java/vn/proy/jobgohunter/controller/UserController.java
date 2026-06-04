@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.turkraft.springfilter.boot.Filter;
 
 import vn.proy.jobgohunter.domain.User;
 import vn.proy.jobgohunter.domain.dto.ResultPaginationDTO;
@@ -35,7 +38,7 @@ public class UserController {
 
     // fetch all users
     @GetMapping("/users")
-    public ResponseEntity<ResultPaginationDTO> getAllUsers(
+    public ResponseEntity<ResultPaginationDTO> getAllUsers(@Filter Specification<User> spec,
             @RequestParam("current") Optional<String> currentOptional,
             @RequestParam("pageSize") Optional<String> pageSizeOptional) {
 
@@ -46,7 +49,7 @@ public class UserController {
         int pageSize = Integer.parseInt(sPageSize);
         Pageable pageable = PageRequest.of(current - 1, pageSize);
 
-        return ResponseEntity.ok(this.userService.fetchAllUsers(pageable));
+        return ResponseEntity.ok(this.userService.fetchAllUsers(spec));
     }
 
     // fetch user by id
