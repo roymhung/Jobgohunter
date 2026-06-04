@@ -45,7 +45,7 @@ public class AuthController {
                 authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
         // Create JWT token
-        String access_Token = this.securityUtil.createToken(authentication);
+        String access_Token = this.securityUtil.createAccessToken(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         ResLoginDTO res = new ResLoginDTO();
@@ -57,6 +57,9 @@ public class AuthController {
             res.setUser(userLogin);
         }
         res.setAccessToken(access_Token);
+
+        // Create refresh token
+        String refresh_Token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), res);
 
         return ResponseEntity.ok().body(res);
     }
