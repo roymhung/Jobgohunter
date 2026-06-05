@@ -2,16 +2,16 @@ package vn.proy.jobgohunter.domain.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public class LoginDTO {
+public class ReqLoginDTO {
     @NotBlank(message = "Username is required!")
     private String username;
 
     @NotBlank(message = "Password is required!")
     private String password;
 
-    public LoginDTO() {}
+    public ReqLoginDTO() {}
 
-    public LoginDTO(String password, String username) {
+    public ReqLoginDTO(String password, String username) {
         this.password = password;
         this.username = username;
     }
