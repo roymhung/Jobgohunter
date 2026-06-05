@@ -65,8 +65,9 @@ public class UserService {
         resultPaginationDTO.setMeta(meta);
         // remove sensitive data
         List<ResUserDTO> listUser = pageUser.getContent().stream()
-                .map(item -> new ResUserDTO(item.getId(), item.getEmail(), item.getName(), item.getAge(),
-                        item.getGender(), item.getAddress(), item.getCreatedAt(), item.getUpdatedAt()))
+                .map(item -> new ResUserDTO(item.getId(), item.getEmail(), item.getName(),
+                        item.getAge(), item.getGender(), item.getAddress(), item.getCreatedAt(),
+                        item.getUpdatedAt()))
                 .collect(Collectors.toList());
 
         resultPaginationDTO.setResult(listUser);
@@ -138,5 +139,13 @@ public class UserService {
         res.setUpdatedAt(user.getUpdatedAt());
 
         return res;
+    }
+
+    public void updateUserToken(String token, String email) {
+        User currentUser = this.handleGetUserByUsername(email);
+        if (currentUser != null) {
+            currentUser.setRefreshToken(token);
+            this.userRepository.save(currentUser);
+        }
     }
 }

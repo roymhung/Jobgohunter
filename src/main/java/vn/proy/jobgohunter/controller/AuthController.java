@@ -1,5 +1,8 @@
 package vn.proy.jobgohunter.controller;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -24,6 +27,10 @@ public class AuthController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SecurityUtil securityUtil;
     private final UserService userService;
+
+    @Value("${jobgohunter.jwt.refresh-token-validity-in-seconds}")
+    private long refreshTokenExpiration;
+
 
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
             SecurityUtil securityUtil, UserService userService) {
@@ -59,8 +66,15 @@ public class AuthController {
         res.setAccessToken(access_Token);
 
         // Create refresh token
-        String refresh_Token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), res);
+        String refresh_token = this.securityUtil.createRefreshToken(loginDTO.getUsername(), res);
 
-        return ResponseEntity.ok().body(res);
+        // update user
+        this.userService.updateUserToken(refresh_token, loginDTO.getUsername());
+
+        // set cookies
+        ResponseCookie resCookie = ResponseCookie.from("refresh_token", refresh_token)
+                .httpOnly(true).secure(true).path("/").maxAge(refreshTokenExpiration).build();
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, resCookie.toString()).body(res);
     }
 }
