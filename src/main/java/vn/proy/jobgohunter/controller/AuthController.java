@@ -53,7 +53,8 @@ public class AuthController {
         Authentication authentication =
                 authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        // Create JWT token
+        // Create JWT token, set thong tin người dùng dang nhập vào SecurityContext(co the su dung
+        // sau nay)
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         ResLoginDTO res = new ResLoginDTO();
