@@ -15,11 +15,19 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
 
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+
+        // cho phep cac URL frontend truy cap API
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000",
+                "http://localhost:4173", "http://localhost:5173"));
 
         // Allowed methods
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+
+        // Allowed headers gui len API
+        configuration.setAllowedHeaders(
+                Arrays.asList("Authorization", "Content-Type", "Accept", "x-no-retry"));
+
+        // Allow credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
 
         // How long the response from a pre-flight request can be cached by clients
