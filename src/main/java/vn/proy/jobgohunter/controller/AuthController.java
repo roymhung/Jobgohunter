@@ -23,6 +23,7 @@ import vn.proy.jobgohunter.domain.dto.ResLoginDTO;
 import vn.proy.jobgohunter.service.UserService;
 import vn.proy.jobgohunter.util.SecurityUtil;
 import vn.proy.jobgohunter.util.annotation.ApiMessage;
+import vn.proy.jobgohunter.util.error.IdInvalidException;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -68,7 +69,8 @@ public class AuthController {
             res.setUser(userLogin);
         }
 
-        String access_Token = this.securityUtil.createAccessToken(authentication, res.getUser());
+        String access_Token =
+                this.securityUtil.createAccessToken(authentication.getName(), res.getUser());
 
         res.setAccessToken(access_Token);
 
@@ -108,14 +110,51 @@ public class AuthController {
 
     @GetMapping("/auth/refresh")
     @ApiMessage("Get new access token by refresh token")
-    public ResponseEntity<String> getRefreshToken(
-            @CookieValue(name = "refresh_token") String refresh_token) {
+    public ResponseEntity<ResLoginDTO> getRefreshToken(
+            @CookieValue(name = "refresh_token", defaultValue = "abc") String refresh_token)
+            throws IdInvalidException {
+
+        if (refresh_token.equals("abc")) {
+            throw new IdInvalidException("Refresh token is missing");
+        }
+
         // check valid refresh token
         Jwt decodedToken = this.securityUtil.checkValidRefreshToken(refresh_token);
 
         String email = decodedToken.getSubject();
 
-        return ResponseEntity.ok().body(email);
+        // check user bu token + email
+        User currentUser = this.userService.getUserByRefreshTokenAndEmail(refresh_token, email);
+        if (currentUser == null) {
+            throw new IdInvalidException("Refresh token is invalid");
+        }
+
+        // issue new token/set refresh token as cookies
+
+        ResLoginDTO res = new ResLoginDTO();
+        User currentUserDB = this.userService.handleGetUserByUsername(email);
+
+        if (currentUserDB != null) {
+            ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin(currentUserDB.getId(),
+                    currentUserDB.getEmail(), currentUserDB.getName());
+            res.setUser(userLogin);
+        }
+
+        String access_Token = this.securityUtil.createAccessToken(email, res.getUser());
+
+        res.setAccessToken(access_Token);
+
+        // Create refresh token
+        String new_refresh_token = this.securityUtil.createRefreshToken(email, res);
+
+        // update user
+        this.userService.updateUserToken(new_refresh_token, email);
+
+        // set cookies
+        ResponseCookie resCookie = ResponseCookie.from("refresh_token", new_refresh_token)
+                .httpOnly(true).secure(true).path("/").maxAge(refreshTokenExpiration).build();
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, resCookie.toString()).body(res);
     }
 
 
