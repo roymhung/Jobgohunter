@@ -17,7 +17,7 @@ import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
 import vn.proy.jobgohunter.domain.Company;
-import vn.proy.jobgohunter.domain.dto.ResultPaginationDTO;
+import vn.proy.jobgohunter.domain.response.ResultPaginationDTO;
 import vn.proy.jobgohunter.service.CompanyService;
 import vn.proy.jobgohunter.util.annotation.ApiMessage;
 

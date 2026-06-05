@@ -8,7 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import vn.proy.jobgohunter.domain.Company;
-import vn.proy.jobgohunter.domain.dto.ResultPaginationDTO;
+import vn.proy.jobgohunter.domain.response.ResultPaginationDTO;
 import vn.proy.jobgohunter.repository.CompanyRepository;
 
 @Service

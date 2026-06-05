@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.turkraft.springfilter.boot.Filter;
 
 import vn.proy.jobgohunter.domain.User;
-import vn.proy.jobgohunter.domain.dto.ResCreateUserDTO;
-import vn.proy.jobgohunter.domain.dto.ResUpdateUserDTO;
-import vn.proy.jobgohunter.domain.dto.ResUserDTO;
-import vn.proy.jobgohunter.domain.dto.ResultPaginationDTO;
+import vn.proy.jobgohunter.domain.response.ResCreateUserDTO;
+import vn.proy.jobgohunter.domain.response.ResUpdateUserDTO;
+import vn.proy.jobgohunter.domain.response.ResUserDTO;
+import vn.proy.jobgohunter.domain.response.ResultPaginationDTO;
 import vn.proy.jobgohunter.service.UserService;
 import vn.proy.jobgohunter.util.annotation.ApiMessage;
 import vn.proy.jobgohunter.util.error.IdInvalidException;
@@ -49,7 +49,8 @@ public class UserController {
     // fetch user by id
     @GetMapping("/users/{id}")
     @ApiMessage("Fetch a user by ID")
-    public ResponseEntity<ResUserDTO> getUserById(@PathVariable("id") long id) throws IdInvalidException {
+    public ResponseEntity<ResUserDTO> getUserById(@PathVariable("id") long id)
+            throws IdInvalidException {
 
         User fetchUser = this.userService.fetchUserById(id);
 
@@ -57,12 +58,14 @@ public class UserController {
             throw new IdInvalidException("User with ID " + id + " not found");
         }
 
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.convertToResUserDTO(fetchUser));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(this.userService.convertToResUserDTO(fetchUser));
     }
 
     @PostMapping("/users")
     @ApiMessage("Create a new user")
-    public ResponseEntity<ResCreateUserDTO> createNewUser(@RequestBody User user) throws IdInvalidException {
+    public ResponseEntity<ResCreateUserDTO> createNewUser(@RequestBody User user)
+            throws IdInvalidException {
 
         boolean isEmailExist = this.userService.checkEmailExist(user.getEmail());
         if (isEmailExist) {
@@ -74,12 +77,14 @@ public class UserController {
         user.setPassword(hashPassword);
         User newUser = this.userService.handleCreateUser(user);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.convertToResCreateUserDTO(newUser));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(this.userService.convertToResCreateUserDTO(newUser));
     }
 
     @PutMapping("/users")
     @ApiMessage("Update a user")
-    public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User user) throws IdInvalidException {
+    public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User user)
+            throws IdInvalidException {
 
         User newUdateUser = this.userService.handleUpdateUser(user);
 
@@ -92,8 +97,7 @@ public class UserController {
 
     @DeleteMapping("/users/{id}")
     @ApiMessage("Delete a user")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id)
-            throws IdInvalidException {
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) throws IdInvalidException {
 
         User currentUser = this.userService.fetchUserById(id);
         if (currentUser == null) {

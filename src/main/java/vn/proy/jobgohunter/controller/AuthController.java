@@ -18,8 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import vn.proy.jobgohunter.domain.User;
-import vn.proy.jobgohunter.domain.dto.ResLoginDTO;
 import vn.proy.jobgohunter.domain.request.ReqLoginDTO;
+import vn.proy.jobgohunter.domain.response.ResLoginDTO;
 import vn.proy.jobgohunter.service.UserService;
 import vn.proy.jobgohunter.util.SecurityUtil;
 import vn.proy.jobgohunter.util.annotation.ApiMessage;

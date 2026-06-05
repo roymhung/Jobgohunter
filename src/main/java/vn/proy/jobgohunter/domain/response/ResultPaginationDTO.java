@@ -1,4 +1,4 @@
-package vn.proy.jobgohunter.domain.dto;
+package vn.proy.jobgohunter.domain.response;
 
 import lombok.Getter;
 import lombok.Setter;
