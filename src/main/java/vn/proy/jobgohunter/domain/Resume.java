@@ -3,6 +3,7 @@ package vn.proy.jobgohunter.domain;
 import java.time.Instant;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import vn.proy.jobgohunter.util.SecurityUtil;
@@ -18,8 +19,10 @@ public class Resume {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Email khong duoc de trong!")
     private String email;
 
+    @NotBlank(message = "URL khong duoc de trong (upload cv chua thanh cong)")
     private String url;
 
     @Enumerated(EnumType.STRING)
