@@ -1,7 +1,6 @@
 package vn.proy.jobgohunter.domain.response;
 
 import java.time.Instant;
-
 import lombok.Getter;
 import lombok.Setter;
 import vn.proy.jobgohunter.util.enums.GenderEnum;
@@ -18,4 +17,13 @@ public class ResUpdateUserDTO {
     private String address;
 
     private Instant updatedAt;
+
+    private CompanyUser company;
+
+    @Getter
+    @Setter
+    public static class CompanyUser {
+        private Long id;
+        private String name;
+    }
 }
