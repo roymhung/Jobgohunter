@@ -49,11 +49,11 @@ public class JobController {
 
         // check id
         Optional<Job> currentJob = this.jobService.fetchJobById(job.getId());
-        if (currentJob == null) {
+        if (!currentJob.isPresent()) {
             throw new IdInvalidException("Job khong ton tai");
         }
 
-        return ResponseEntity.ok().body(this.jobService.update(job));
+        return ResponseEntity.ok().body(this.jobService.update(job, currentJob.get()));
     }
 
     @DeleteMapping("/jobs/{id}")
