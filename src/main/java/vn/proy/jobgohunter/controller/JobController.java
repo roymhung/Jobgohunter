@@ -19,7 +19,6 @@ import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
 import vn.proy.jobgohunter.domain.Job;
-import vn.proy.jobgohunter.domain.Skill;
 import vn.proy.jobgohunter.domain.response.ResultPaginationDTO;
 import vn.proy.jobgohunter.domain.response.job.ResCreateJobDTO;
 import vn.proy.jobgohunter.domain.response.job.ResUpdateJobDTO;
