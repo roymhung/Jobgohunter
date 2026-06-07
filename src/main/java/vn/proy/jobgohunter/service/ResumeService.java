@@ -9,6 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.turkraft.springfilter.converter.FilterSpecification;
+import com.turkraft.springfilter.converter.FilterSpecificationConverter;
+import com.turkraft.springfilter.parser.FilterParser;
+import com.turkraft.springfilter.parser.node.FilterNode;
+
 import vn.proy.jobgohunter.domain.Job;
 import vn.proy.jobgohunter.domain.Resume;
 import vn.proy.jobgohunter.domain.User;
@@ -19,6 +24,7 @@ import vn.proy.jobgohunter.domain.response.resume.ResUpdateResumeDTO;
 import vn.proy.jobgohunter.repository.JobRepository;
 import vn.proy.jobgohunter.repository.ResumeRepository;
 import vn.proy.jobgohunter.repository.UserRepository;
+import vn.proy.jobgohunter.util.SecurityUtil;
 
 @Service
 public class ResumeService {
@@ -26,12 +32,18 @@ public class ResumeService {
     private final ResumeRepository resumeRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final FilterParser filterParser;
+    private final FilterSpecificationConverter filterSpecificationConverter;
 
-    public ResumeService(JobRepository jobRepository, ResumeRepository resumeRepository,
-            UserRepository userRepository) {
-        this.jobRepository = jobRepository;
+
+    public ResumeService(ResumeRepository resumeRepository, JobRepository jobRepository,
+            UserRepository userRepository, FilterParser filterParser,
+            FilterSpecificationConverter filterSpecificationConverter) {
         this.resumeRepository = resumeRepository;
+        this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.filterParser = filterParser;
+        this.filterSpecificationConverter = filterSpecificationConverter;
     }
 
     public Optional<Resume> fetchById(long id) {
@@ -128,5 +140,30 @@ public class ResumeService {
 
         return rs;
     }
+
+    public ResultPaginationDTO fetchResumeByUser(Pageable pageable) {
+        // query builder
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        FilterNode node = filterParser.parse("email='" + email + "'");
+        FilterSpecification<Resume> spec = filterSpecificationConverter.convert(node);
+        Page<Resume> pageResume = this.resumeRepository.findAll(spec, pageable);
+
+        ResultPaginationDTO rs = new ResultPaginationDTO();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
+
+        mt.setPage(pageable.getPageNumber() + 1);
+        mt.setPageSize(pageable.getPageSize());
+
+        mt.setPages(pageResume.getTotalPages());
+        mt.setTotal(pageResume.getTotalElements());
+
+        rs.setMeta(mt);
+
+        return rs;
+    }
+
 
 }
