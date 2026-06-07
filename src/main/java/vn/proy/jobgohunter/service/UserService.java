@@ -211,4 +211,9 @@ public class UserService {
     public User getUserByRefreshTokenAndEmail(String token, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
+
+    // Bổ sung hàm này nếu chưa có
+    public boolean isEmailExist(String email) {
+        return this.userRepository.existsByEmail(email);
+    }
 }
