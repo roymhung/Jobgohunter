@@ -14,7 +14,7 @@ import vn.proy.jobgohunter.domain.Role;
 import vn.proy.jobgohunter.domain.User;
 import vn.proy.jobgohunter.service.UserService;
 import vn.proy.jobgohunter.util.SecurityUtil;
-import vn.proy.jobgohunter.util.error.IdInvalidException;
+import vn.proy.jobgohunter.util.error.PermissionException;
 
 public class PermissionInterceptor implements HandlerInterceptor {
 
@@ -48,10 +48,10 @@ public class PermissionInterceptor implements HandlerInterceptor {
                             permissions.stream().anyMatch(item -> item.getApiPath().equals(path)
                                     && item.getMethod().equals(httpMethod));
                     if (isAllow == false) {
-                        throw new IdInvalidException("Bạn không có quyền truy cập vào API này");
+                        throw new PermissionException("Bạn không có quyền truy cập vào API này");
                     }
                 } else {
-                    throw new IdInvalidException("Bạn không có quyền truy cập vào API này");
+                    throw new PermissionException("Bạn không có quyền truy cập vào API này");
                 }
             }
         }
