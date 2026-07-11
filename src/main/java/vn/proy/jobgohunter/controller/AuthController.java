@@ -165,7 +165,7 @@ public class AuthController {
     }
 
 
-    @GetMapping("/auth/logout")
+    @PostMapping("/auth/logout")
     @ApiMessage("Logout User")
     public ResponseEntity<Void> logout() throws IdInvalidException {
 
