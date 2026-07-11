@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import vn.proy.jobgohunter.domain.Permission;
 import vn.proy.jobgohunter.domain.Role;
@@ -14,6 +15,7 @@ import vn.proy.jobgohunter.repository.RoleRepository;
 import vn.proy.jobgohunter.repository.UserRepository;
 import vn.proy.jobgohunter.util.enums.GenderEnum;
 
+@Service
 public class DatabaseInitializer implements CommandLineRunner {
 
     private final PermissionRepository permissionRepository;
