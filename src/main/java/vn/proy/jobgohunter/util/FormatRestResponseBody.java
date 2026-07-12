@@ -37,6 +37,11 @@ public class FormatRestResponseBody implements ResponseBodyAdvice<Object> {
             return body;
         }
 
+        String path = request.getURI().getPath();
+        if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
+            return body;
+        }
+
         // Check if the status code represents an error
         if (status >= 400) {
             return body;
