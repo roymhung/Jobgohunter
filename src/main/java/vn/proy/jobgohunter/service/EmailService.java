@@ -1,20 +1,19 @@
 package vn.proy.jobgohunter.service;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import vn.proy.jobgohunter.domain.Job;
 import vn.proy.jobgohunter.repository.JobRepository;
 
 @Service
@@ -58,14 +57,15 @@ public class EmailService {
         }
     }
 
-    public void sendEmailFromTemplateSync(String to, String subject, String templateName) {
-        Context context = new Context();
-        List<Job> arrJob = this.jobRepository.findAll();
-        String name = "Hung";
-        context.setVariable("name", name);
-        context.setVariable("arrJob", arrJob);
+    @Async
+    public void sendEmailFromTemplateSync(String to, String subject, String templateName,
+            String username, Object value) {
 
-        String content = this.templateEngine.process(templateName, context);
+        Context context = new Context();
+        context.setVariable("name", username);
+        context.setVariable("jobs", value);
+
+        String content = templateEngine.process(templateName, context);
         this.sendEmailSync(to, subject, content, false, true);
     }
 
