@@ -1,6 +1,7 @@
 package vn.proy.jobgohunter.service;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
@@ -8,12 +9,13 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import vn.proy.jobgohunter.domain.Job;
+import vn.proy.jobgohunter.repository.JobRepository;
 
 @Service
 public class EmailService {
@@ -21,12 +23,14 @@ public class EmailService {
     private final MailSender mailSender;
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
+    private final JobRepository jobRepository;
 
     public EmailService(MailSender mailSender, JavaMailSender javaMailSender,
-            SpringTemplateEngine templateEngine) {
+            SpringTemplateEngine templateEngine, JobRepository jobRepository) {
         this.mailSender = mailSender;
         this.javaMailSender = javaMailSender;
         this.templateEngine = templateEngine;
+        this.jobRepository = jobRepository;
     }
 
     public void sendSimpleEmail() {
@@ -56,6 +60,11 @@ public class EmailService {
 
     public void sendEmailFromTemplateSync(String to, String subject, String templateName) {
         Context context = new Context();
+        List<Job> arrJob = this.jobRepository.findAll();
+        String name = "Hung";
+        context.setVariable("name", name);
+        context.setVariable("arrJob", arrJob);
+
         String content = this.templateEngine.process(templateName, context);
         this.sendEmailSync(to, subject, content, false, true);
     }
