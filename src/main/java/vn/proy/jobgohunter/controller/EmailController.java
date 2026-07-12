@@ -23,6 +23,8 @@ public class EmailController {
 
     @GetMapping("/email")
     @ApiMessage("Send simple email")
+    // @Scheduled(cron = "*/30 * * * * *")
+    // @Transactional
     public String sendSimpleEmail() {
         // this.emailService.sendEmailSync("royhung123cxz@gmail.com",
         // "Testing send email from Spring Boot",
