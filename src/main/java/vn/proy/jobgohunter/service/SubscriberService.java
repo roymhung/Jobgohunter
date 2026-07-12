@@ -1,10 +1,10 @@
 package vn.proy.jobgohunter.service;
 
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
 
 import vn.proy.jobgohunter.domain.Job;
 import vn.proy.jobgohunter.domain.Skill;
@@ -30,6 +30,11 @@ public class SubscriberService {
         this.jobRepository = jobRepository;
         this.emailService = emailService;
     }
+
+    // @Scheduled(fixedDelay = 1000)
+    // public void testCron() {
+    // System.out.println(">>> TEST CRON");s
+    // }
 
     public boolean isExistsByEmail(String email) {
         return this.subscriberRepository.existsByEmail(email);
