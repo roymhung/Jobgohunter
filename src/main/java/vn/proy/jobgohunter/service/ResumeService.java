@@ -162,6 +162,11 @@ public class ResumeService {
 
         rs.setMeta(mt);
 
+        List<ResFetchResumeDTO> listResume = pageResume.getContent().stream()
+                .map(item -> this.getResume(item)).collect(Collectors.toList());
+
+        rs.setResult(listResume);
+
         return rs;
     }
 
