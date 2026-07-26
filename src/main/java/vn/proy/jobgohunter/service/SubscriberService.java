@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import vn.proy.jobgohunter.domain.Job;
 import vn.proy.jobgohunter.domain.Skill;
@@ -13,6 +14,7 @@ import vn.proy.jobgohunter.domain.response.email.ResEmailJob;
 import vn.proy.jobgohunter.repository.JobRepository;
 import vn.proy.jobgohunter.repository.SkillRepository;
 import vn.proy.jobgohunter.repository.SubscriberRepository;
+import vn.proy.jobgohunter.util.error.IdInvalidException;
 
 @Service
 public class SubscriberService {
@@ -75,26 +77,72 @@ public class SubscriberService {
         return this.subscriberRepository.findById(id).orElse(null);
     }
 
-    public void sendSubscribersEmailJobs() {
+    @Transactional(readOnly = true)
+    public int sendSubscribersEmailJobs() {
+        int sentCount = 0;
         List<Subscriber> listSubs = this.subscriberRepository.findAll();
-        if (listSubs != null && listSubs.size() > 0) {
-            for (Subscriber sub : listSubs) {
-                List<Skill> listSkills = sub.getSkills();
-                if (listSkills != null && listSkills.size() > 0) {
-                    List<Job> listJobs = this.jobRepository.findBySkillsIn(listSkills);
-                    if (listJobs != null && listJobs.size() > 0) {
-
-                        List<ResEmailJob> arr =
-                                listJobs.stream().map(job -> this.convertJobToSendEmail(job))
-                                        .collect(Collectors.toList());
-
-                        this.emailService.sendEmailFromTemplateSync(sub.getEmail(),
-                                "Cơ hội việc làm hot đang chờ đón bạn, khám phá ngay", "job",
-                                sub.getName(), arr);
-                    }
-                }
-            }
+        if (listSubs == null || listSubs.isEmpty()) {
+            System.out.println(">>> EMAIL: Không có subscriber nào trong DB");
+            return sentCount;
         }
+
+        for (Subscriber sub : listSubs) {
+            List<Skill> listSkills = sub.getSkills();
+            if (listSkills == null || listSkills.isEmpty()) {
+                System.out.println(">>> EMAIL: Subscriber " + sub.getEmail() + " chưa chọn skill");
+                continue;
+            }
+
+            List<Long> skillIds =
+                    listSkills.stream().map(Skill::getId).collect(Collectors.toList());
+            List<Job> listJobs = this.jobRepository.findDistinctBySkillIds(skillIds);
+            if (listJobs == null || listJobs.isEmpty()) {
+                System.out.println(">>> EMAIL: Không có job khớp skill của " + sub.getEmail());
+                continue;
+            }
+
+            List<ResEmailJob> arr = listJobs.stream().map(job -> this.convertJobToSendEmail(job))
+                    .collect(Collectors.toList());
+
+            System.out.println(">>> EMAIL: Gửi " + arr.size() + " job tới " + sub.getEmail());
+            this.emailService.sendEmailFromTemplateSync(sub.getEmail(),
+                    "Cơ hội việc làm hot đang chờ đón bạn, khám phá ngay", "job",
+                    sub.getName(), arr);
+            sentCount++;
+        }
+        return sentCount;
+    }
+
+    @Transactional(readOnly = true)
+    public int sendSubscriberEmailJobsByEmail(String email) throws IdInvalidException {
+        Subscriber sub = this.findByEmail(email);
+        if (sub == null) {
+            throw new IdInvalidException(
+                    "Bạn chưa đăng ký nhận job qua email. Hãy chọn kỹ năng và bấm Cập nhật trước.");
+        }
+
+        List<Skill> listSkills = sub.getSkills();
+        if (listSkills == null || listSkills.isEmpty()) {
+            throw new IdInvalidException("Chưa chọn kỹ năng để nhận job qua email.");
+        }
+
+        List<Long> skillIds =
+                listSkills.stream().map(Skill::getId).collect(Collectors.toList());
+        List<Job> listJobs = this.jobRepository.findDistinctBySkillIds(skillIds);
+        if (listJobs == null || listJobs.isEmpty()) {
+            System.out.println(">>> EMAIL: Không có job khớp skill của " + email);
+            return 0;
+        }
+
+        List<ResEmailJob> arr = listJobs.stream().map(job -> this.convertJobToSendEmail(job))
+                .collect(Collectors.toList());
+
+        System.out.println(">>> EMAIL: Gửi " + arr.size() + " job (skill ids " + skillIds
+                + ") tới " + email);
+        this.emailService.sendEmailFromTemplateSync(email,
+                "Cơ hội việc làm hot đang chờ đón bạn, khám phá ngay", "job", sub.getName(),
+                arr);
+        return arr.size();
     }
 
     public ResEmailJob convertJobToSendEmail(Job job) {

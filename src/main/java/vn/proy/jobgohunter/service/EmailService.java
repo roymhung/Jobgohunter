@@ -2,12 +2,12 @@ package vn.proy.jobgohunter.service;
 
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -18,6 +18,9 @@ import vn.proy.jobgohunter.repository.JobRepository;
 
 @Service
 public class EmailService {
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
 
     private final MailSender mailSender;
     private final JavaMailSender javaMailSender;
@@ -49,15 +52,17 @@ public class EmailService {
             MimeMessageHelper message =
                     new MimeMessageHelper(mimeMessage, isMultipart, StandardCharsets.UTF_8.name());
             message.setTo(to);
+            message.setFrom(fromEmail);
             message.setSubject(subject);
             message.setText(content, isHtml);
             this.javaMailSender.send(mimeMessage);
         } catch (MailException | MessagingException e) {
-            System.out.println("ERROR SEND EMAIL: " + e);
+            System.err.println("ERROR SEND EMAIL to " + to + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Gửi email thất bại: " + e.getMessage(), e);
         }
     }
 
-    @Async
     public void sendEmailFromTemplateSync(String to, String subject, String templateName,
             String username, Object value) {
 
