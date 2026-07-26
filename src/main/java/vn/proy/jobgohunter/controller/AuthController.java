@@ -14,15 +14,18 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import vn.proy.jobgohunter.domain.User;
+import vn.proy.jobgohunter.domain.request.ReqChangePasswordDTO;
 import vn.proy.jobgohunter.domain.request.ReqLoginDTO;
 import vn.proy.jobgohunter.domain.response.ResCreateUserDTO;
 import vn.proy.jobgohunter.domain.response.ResLoginDTO;
+import vn.proy.jobgohunter.domain.response.ResUpdateUserDTO;
 import vn.proy.jobgohunter.service.UserService;
 import vn.proy.jobgohunter.util.SecurityUtil;
 import vn.proy.jobgohunter.util.annotation.ApiMessage;
@@ -99,19 +102,71 @@ public class AuthController {
                 : "";
 
         User currentUserDB = this.userService.handleGetUserByUsername(email);
-        ResLoginDTO.UserLogin userLogin = new ResLoginDTO.UserLogin();
+        ResLoginDTO.UserAccountDetail userAccountDetail = new ResLoginDTO.UserAccountDetail();
         ResLoginDTO.UserGetAccount userGetAccount = new ResLoginDTO.UserGetAccount();
 
         if (currentUserDB != null) {
-            userLogin.setId(currentUserDB.getId());
-            userLogin.setEmail(currentUserDB.getEmail());
-            userLogin.setName(currentUserDB.getName());
-            userLogin.setRole(currentUserDB.getRole());
+            userAccountDetail.setId(currentUserDB.getId());
+            userAccountDetail.setEmail(currentUserDB.getEmail());
+            userAccountDetail.setName(currentUserDB.getName());
+            userAccountDetail.setAge(currentUserDB.getAge());
+            userAccountDetail.setGender(currentUserDB.getGender());
+            userAccountDetail.setAddress(currentUserDB.getAddress());
+            userAccountDetail.setRole(currentUserDB.getRole());
 
-            userGetAccount.setUser(userLogin);
+            userGetAccount.setUser(userAccountDetail);
         }
 
         return ResponseEntity.ok().body(userGetAccount);
+    }
+
+    @PutMapping("/auth/account")
+    @ApiMessage("Update current user account")
+    public ResponseEntity<ResUpdateUserDTO> updateAccount(@RequestBody User reqUser)
+            throws IdInvalidException {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        if (email.equals("")) {
+            throw new IdInvalidException("Access token is Invalid");
+        }
+
+        User currentUserDB = this.userService.handleGetUserByUsername(email);
+        if (currentUserDB == null) {
+            throw new IdInvalidException("User not found");
+        }
+
+        reqUser.setId(currentUserDB.getId());
+        User updatedUser = this.userService.handleUpdateUser(reqUser);
+        return ResponseEntity.ok(this.userService.convertToResUpdateUserDTO(updatedUser));
+    }
+
+    @PostMapping("/auth/change-password")
+    @ApiMessage("Change current user password")
+    public ResponseEntity<Void> changePassword(@Valid @RequestBody ReqChangePasswordDTO dto)
+            throws IdInvalidException {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+
+        if (email.equals("")) {
+            throw new IdInvalidException("Access token is Invalid");
+        }
+
+        User currentUserDB = this.userService.handleGetUserByUsername(email);
+        if (currentUserDB == null) {
+            throw new IdInvalidException("User not found");
+        }
+
+        if (!this.passwordEncoder.matches(dto.getCurrentPassword(), currentUserDB.getPassword())) {
+            throw new IdInvalidException("Mật khẩu hiện tại không đúng");
+        }
+
+        currentUserDB.setPassword(this.passwordEncoder.encode(dto.getNewPassword()));
+        this.userService.saveUser(currentUserDB);
+
+        return ResponseEntity.ok().body(null);
     }
 
 

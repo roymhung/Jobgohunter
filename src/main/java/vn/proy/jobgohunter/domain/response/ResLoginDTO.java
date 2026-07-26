@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.proy.jobgohunter.domain.Role;
+import vn.proy.jobgohunter.util.enums.GenderEnum;
 
 @Getter
 @Setter
@@ -33,8 +34,22 @@ public class ResLoginDTO {
     @Setter
     @AllArgsConstructor
     @NoArgsConstructor
+    public static class UserAccountDetail {
+        private long id;
+        private String email;
+        private String name;
+        private int age;
+        private GenderEnum gender;
+        private String address;
+        private Role role;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
     public static class UserGetAccount {
-        private UserLogin user;
+        private UserAccountDetail user;
     }
 
     @Getter

@@ -212,6 +212,10 @@ public class UserService {
         return this.userRepository.findByRefreshTokenAndEmail(token, email);
     }
 
+    public User saveUser(User user) {
+        return this.userRepository.save(user);
+    }
+
     // Bổ sung hàm này nếu chưa có
     public boolean isEmailExist(String email) {
         return this.userRepository.existsByEmail(email);
