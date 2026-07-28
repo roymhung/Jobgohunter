@@ -50,6 +50,12 @@ public class Subscriber {
     private String createdBy;
     private String updatedBy;
 
+    /** Lần gửi email job gần nhất — dùng lọc job mới. */
+    private Instant lastEmailSentAt;
+
+    /** false = user đã hủy đăng ký nhận email. */
+    private boolean subscribed = true;
+
     @PrePersist
     public void handleBeforeCreate() {
         this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true

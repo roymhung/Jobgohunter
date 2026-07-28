@@ -1,5 +1,7 @@
 package vn.proy.jobgohunter.service;
 
+import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -33,116 +35,105 @@ public class SubscriberService {
         this.emailService = emailService;
     }
 
-    // @Scheduled(fixedDelay = 1000)
-    // public void testCron() {
-    // System.out.println(">>> TEST CRON");s
-    // }
-
     public boolean isExistsByEmail(String email) {
         return this.subscriberRepository.existsByEmail(email);
     }
 
     public Subscriber create(Subscriber subs) {
-        // check skills
         if (subs.getSkills() != null) {
             List<Long> reqSkills =
                     subs.getSkills().stream().map(x -> x.getId()).collect(Collectors.toList());
-
             List<Skill> dbSkills = this.skillRepository.findByIdIn(reqSkills);
             subs.setSkills(dbSkills);
         }
-
+        subs.setSubscribed(true);
         return this.subscriberRepository.save(subs);
     }
 
     public Subscriber update(Subscriber subsDB, Subscriber subsRequest) {
-        // check skills
         if (subsRequest.getSkills() != null) {
             List<Long> reqSkills = subsRequest.getSkills().stream().map(x -> x.getId())
                     .collect(Collectors.toList());
-
             List<Skill> dbSkills = this.skillRepository.findByIdIn(reqSkills);
             subsDB.setSkills(dbSkills);
         }
-
+        subsDB.setSubscribed(true);
         return this.subscriberRepository.save(subsDB);
     }
 
-    // 1. Thêm hàm tìm kiếm theo ID
     public Subscriber findById(long id) {
         Optional<Subscriber> subsOptional = this.subscriberRepository.findById(id);
-        if (subsOptional.isPresent()) {
-            return subsOptional.get();
-        }
-        return this.subscriberRepository.findById(id).orElse(null);
+        return subsOptional.orElse(null);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public int sendSubscribersEmailJobs() {
         int sentCount = 0;
         List<Subscriber> listSubs = this.subscriberRepository.findAll();
         if (listSubs == null || listSubs.isEmpty()) {
-            System.out.println(">>> EMAIL: Không có subscriber nào trong DB");
             return sentCount;
         }
-
         for (Subscriber sub : listSubs) {
-            List<Skill> listSkills = sub.getSkills();
-            if (listSkills == null || listSkills.isEmpty()) {
-                System.out.println(">>> EMAIL: Subscriber " + sub.getEmail() + " chưa chọn skill");
-                continue;
+            if (sendNewJobsToSubscriber(sub) > 0) {
+                sentCount++;
             }
-
-            List<Long> skillIds =
-                    listSkills.stream().map(Skill::getId).collect(Collectors.toList());
-            List<Job> listJobs = this.jobRepository.findDistinctBySkillIds(skillIds);
-            if (listJobs == null || listJobs.isEmpty()) {
-                System.out.println(">>> EMAIL: Không có job khớp skill của " + sub.getEmail());
-                continue;
-            }
-
-            List<ResEmailJob> arr = listJobs.stream().map(job -> this.convertJobToSendEmail(job))
-                    .collect(Collectors.toList());
-
-            System.out.println(">>> EMAIL: Gửi " + arr.size() + " job tới " + sub.getEmail());
-            this.emailService.sendEmailFromTemplateSync(sub.getEmail(),
-                    "Cơ hội việc làm hot đang chờ đón bạn, khám phá ngay", "job",
-                    sub.getName(), arr);
-            sentCount++;
         }
         return sentCount;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public int sendSubscriberEmailJobsByEmail(String email) throws IdInvalidException {
         Subscriber sub = this.findByEmail(email);
         if (sub == null) {
             throw new IdInvalidException(
                     "Bạn chưa đăng ký nhận job qua email. Hãy chọn kỹ năng và bấm Cập nhật trước.");
         }
-
-        List<Skill> listSkills = sub.getSkills();
-        if (listSkills == null || listSkills.isEmpty()) {
-            throw new IdInvalidException("Chưa chọn kỹ năng để nhận job qua email.");
+        if (!sub.isSubscribed()) {
+            throw new IdInvalidException(
+                    "Bạn đã hủy nhận email job. Chọn kỹ năng và bấm Cập nhật để đăng ký lại.");
         }
+        return sendNewJobsToSubscriber(sub);
+    }
 
-        List<Long> skillIds =
-                listSkills.stream().map(Skill::getId).collect(Collectors.toList());
-        List<Job> listJobs = this.jobRepository.findDistinctBySkillIds(skillIds);
-        if (listJobs == null || listJobs.isEmpty()) {
-            System.out.println(">>> EMAIL: Không có job khớp skill của " + email);
+    @Transactional
+    public void unsubscribeByEmail(String email) throws IdInvalidException {
+        Subscriber sub = this.findByEmail(email);
+        if (sub == null) {
+            throw new IdInvalidException("Bạn chưa đăng ký nhận job qua email.");
+        }
+        sub.setSubscribed(false);
+        this.subscriberRepository.save(sub);
+    }
+
+    private int sendNewJobsToSubscriber(Subscriber sub) {
+        if (!sub.isSubscribed()) {
             return 0;
         }
-
-        List<ResEmailJob> arr = listJobs.stream().map(job -> this.convertJobToSendEmail(job))
+        List<Job> listJobs = findNewMatchingJobs(sub);
+        if (listJobs.isEmpty()) {
+            return 0;
+        }
+        List<ResEmailJob> arr = listJobs.stream().map(this::convertJobToSendEmail)
                 .collect(Collectors.toList());
-
-        System.out.println(">>> EMAIL: Gửi " + arr.size() + " job (skill ids " + skillIds
-                + ") tới " + email);
-        this.emailService.sendEmailFromTemplateSync(email,
+        this.emailService.sendEmailFromTemplateSync(sub.getEmail(),
                 "Cơ hội việc làm hot đang chờ đón bạn, khám phá ngay", "job", sub.getName(),
                 arr);
+        sub.setLastEmailSentAt(Instant.now());
+        this.subscriberRepository.save(sub);
         return arr.size();
+    }
+
+    private List<Job> findNewMatchingJobs(Subscriber sub) {
+        List<Skill> listSkills = sub.getSkills();
+        if (listSkills == null || listSkills.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<Long> skillIds =
+                listSkills.stream().map(Skill::getId).collect(Collectors.toList());
+        Instant since = sub.getLastEmailSentAt() != null ? sub.getLastEmailSentAt() : Instant.EPOCH;
+        List<Job> listJobs =
+                this.jobRepository.findDistinctBySkillIdsAndCreatedAtAfter(skillIds, since);
+        return listJobs != null ? listJobs : Collections.emptyList();
     }
 
     public ResEmailJob convertJobToSendEmail(Job job) {
@@ -161,5 +152,4 @@ public class SubscriberService {
     public Subscriber findByEmail(String email) {
         return this.subscriberRepository.findByEmail(email);
     }
-
 }

@@ -2,6 +2,9 @@ package vn.proy.jobgohunter.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.util.Map;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -58,5 +61,19 @@ public class SubscriberController {
                 : "";
 
         return ResponseEntity.ok().body(this.subscriberService.findByEmail(email));
+    }
+
+    @DeleteMapping("/subscribers/me")
+    @ApiMessage("Unsubscribe from job alert emails")
+    public ResponseEntity<Map<String, String>> unsubscribeMe() throws IdInvalidException {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent()
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+        if (email.isEmpty()) {
+            throw new IdInvalidException("Bạn cần đăng nhập để hủy đăng ký email job");
+        }
+        this.subscriberService.unsubscribeByEmail(email);
+        return ResponseEntity.ok(Map.of("message",
+                "Đã hủy nhận email job. Cập nhật kỹ năng để đăng ký lại."));
     }
 }

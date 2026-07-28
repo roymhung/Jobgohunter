@@ -20,4 +20,8 @@ public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificatio
     @Query("SELECT DISTINCT j FROM Job j JOIN j.skills s WHERE s.id IN :skillIds AND j.active = true")
     List<Job> findDistinctBySkillIds(@Param("skillIds") List<Long> skillIds);
 
+    @Query("SELECT DISTINCT j FROM Job j JOIN j.skills s WHERE s.id IN :skillIds AND j.active = true AND j.createdAt > :since")
+    List<Job> findDistinctBySkillIdsAndCreatedAtAfter(@Param("skillIds") List<Long> skillIds,
+            @Param("since") java.time.Instant since);
+
 }

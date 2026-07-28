@@ -31,8 +31,8 @@ public class EmailController {
         java.util.Map<String, Object> result = new java.util.HashMap<>();
         result.put("sentCount", sentCount);
         result.put("message", sentCount > 0
-                ? "Đã gửi email tới " + sentCount + " subscriber"
-                : "Không gửi email nào — kiểm tra subscriber, skill và job trong DB (xem log console)");
+                ? "Đã gửi email job mới tới " + sentCount + " subscriber"
+                : "Không gửi — không có job mới kể từ lần email trước");
         return ResponseEntity.ok(result);
     }
 
@@ -54,8 +54,8 @@ public class EmailController {
         result.put("jobCount", jobCount);
         result.put("sent", jobCount > 0);
         result.put("message", jobCount > 0
-                ? "Đã gửi " + jobCount + " job khớp skill tới " + email
-                : "Không có job khớp skill bạn chọn — thử chọn skill khác hoặc đợi admin thêm job");
+                ? "Đã gửi " + jobCount + " job mới khớp skill tới " + email
+                : "Không có job mới kể từ lần gửi trước — hệ thống tự gửi lúc 8h sáng khi có job mới");
         return ResponseEntity.ok(result);
     }
 }
