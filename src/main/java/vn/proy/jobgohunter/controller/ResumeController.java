@@ -133,10 +133,13 @@ public class ResumeController {
             }
         }
 
-        Specification<Resume> jobInSpec = filterSpecificationConverter
-                .convert(filterBuilder.field("job").in(filterBuilder.input(arrJobIds)).get());
-
-        Specification<Resume> finalSpec = jobInSpec.and(spec);
+        Specification<Resume> finalSpec = spec;
+        // HR: chỉ CV thuộc job của công ty. Super admin (không company): xem tất cả.
+        if (arrJobIds != null && !arrJobIds.isEmpty()) {
+            Specification<Resume> jobInSpec = filterSpecificationConverter.convert(
+                    filterBuilder.field("job").in(filterBuilder.input(arrJobIds)).get());
+            finalSpec = jobInSpec.and(spec);
+        }
 
         return ResponseEntity.ok().body(this.resumeService.fetchAllResume(finalSpec, pageable));
     }

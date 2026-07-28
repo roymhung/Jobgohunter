@@ -38,27 +38,45 @@ public class RoleService {
     }
 
     public Role create(Role r) {
-        // check permissions
         if (r.getPermissions() != null) {
-            List<Long> reqPermissions =
-                    r.getPermissions().stream().map(x -> x.getId()).collect(Collectors.toList());
+            List<Long> reqPermissions = r.getPermissions().stream()
+                    .filter(p -> p.getId() > 0)
+                    .map(Permission::getId)
+                    .collect(Collectors.toList());
 
-            List<Permission> dbPermissions = this.permissionRepository.findByIdIn(reqPermissions);
-            r.setPermissions(dbPermissions);
+            if (!reqPermissions.isEmpty()) {
+                List<Permission> dbPermissions =
+                        this.permissionRepository.findByIdIn(reqPermissions);
+                r.setPermissions(dbPermissions);
+            } else {
+                r.setPermissions(List.of());
+            }
         }
 
         return this.roleRepository.save(r);
     }
 
     public Role update(Role r) {
+        if (r.getId() <= 0) {
+            return null;
+        }
         Role roleDB = this.fetchById(r.getId());
-        // check permissions
+        if (roleDB == null) {
+            return null;
+        }
         if (r.getPermissions() != null) {
-            List<Long> reqPermissions =
-                    r.getPermissions().stream().map(x -> x.getId()).collect(Collectors.toList());
+            List<Long> reqPermissions = r.getPermissions().stream()
+                    .filter(p -> p.getId() > 0)
+                    .map(Permission::getId)
+                    .collect(Collectors.toList());
 
-            List<Permission> dbPermissions = this.permissionRepository.findByIdIn(reqPermissions);
-            r.setPermissions(dbPermissions);
+            if (!reqPermissions.isEmpty()) {
+                List<Permission> dbPermissions =
+                        this.permissionRepository.findByIdIn(reqPermissions);
+                r.setPermissions(dbPermissions);
+            } else {
+                r.setPermissions(List.of());
+            }
         }
 
         roleDB.setName(r.getName());

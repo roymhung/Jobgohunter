@@ -32,16 +32,15 @@ public class UserService {
     }
 
     public User handleCreateUser(User user) {
-        // Logic to create a user and save to the database
-        // check company
-        if (user.getCompany() != null) {
+        if (user.getCompany() != null && user.getCompany().getId() != null) {
             Optional<Company> companyOptional =
                     this.companyService.findById(user.getCompany().getId());
-            user.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+            user.setCompany(companyOptional.orElse(null));
+        } else {
+            user.setCompany(null);
         }
 
-        // check role
-        if (user.getRole() != null) {
+        if (user.getRole() != null && user.getRole().getId() > 0) {
             Role r = this.roleService.fetchById(user.getRole().getId());
             user.setRole(r != null ? r : null);
         }
@@ -102,14 +101,14 @@ public class UserService {
             currentUser.setAddress(reqUser.getAddress());
 
             // check company
-            if (reqUser.getCompany() != null) {
+            if (reqUser.getCompany() != null && reqUser.getCompany().getId() != null) {
                 Optional<Company> companyOptional =
                         this.companyService.findById(reqUser.getCompany().getId());
-                reqUser.setCompany(companyOptional.isPresent() ? companyOptional.get() : null);
+                currentUser.setCompany(companyOptional.orElse(null));
             }
 
             // check role
-            if (reqUser.getRole() != null) {
+            if (reqUser.getRole() != null && reqUser.getRole().getId() > 0) {
                 Role r = this.roleService.fetchById(reqUser.getRole().getId());
                 currentUser.setRole(r != null ? r : null);
             }
