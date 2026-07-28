@@ -61,6 +61,16 @@ public class FileController {
                     "Invalid file extension. only allows " + allowedExtensions.toString());
         }
 
+        if ("resume".equalsIgnoreCase(folder)) {
+            if (fileName == null || !fileName.toLowerCase().endsWith(".pdf")) {
+                throw new StorageException("CV chỉ chấp nhận file PDF (.pdf)");
+            }
+            long maxCvBytes = 5L * 1024 * 1024;
+            if (file.getSize() > maxCvBytes) {
+                throw new StorageException("File CV không được vượt quá 5MB");
+            }
+        }
+
         // create a directory if not exist
         this.fileService.createDirectory(baseURI + folder);
 
