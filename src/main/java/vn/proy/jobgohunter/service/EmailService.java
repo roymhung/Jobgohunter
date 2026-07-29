@@ -74,6 +74,15 @@ public class EmailService {
         this.sendEmailSync(to, subject, content, false, true);
     }
 
+    public void sendPasswordResetEmail(String to, String name, String resetLink, int validMinutes) {
+        Context context = new Context();
+        context.setVariable("name", name != null ? name : "bạn");
+        context.setVariable("resetLink", resetLink);
+        context.setVariable("validMinutes", validMinutes);
+        String content = templateEngine.process("password-reset", context);
+        this.sendEmailSync(to, "Job Hunter — Đặt lại mật khẩu", content, false, true);
+    }
+
 
 
 }
