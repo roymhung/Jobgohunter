@@ -41,4 +41,10 @@ public class InterviewSubscription {
 
     @Column(name = "ends_at")
     private Instant endsAt;
+
+    @Column(name = "created_at")
+    private Instant createdAt;
+
+    @Column(name = "transfer_submitted_at")
+    private Instant transferSubmittedAt;
 }

@@ -333,6 +333,7 @@ public class InterviewService {
         dto.setCode(t.getCode());
         dto.setName(t.getName());
         dto.setGroupName(t.getGroupName());
+        dto.setQuestionCount(questionRepository.countByTopicCodeAndActiveTrue(t.getCode()));
         return dto;
     }
 

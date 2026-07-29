@@ -18,4 +18,10 @@ public class InterviewProperties {
     private int durationMinutes = 45;
     private int passPercent = 80;
     private int maxTopics = 3;
+
+    private long proYearPriceVnd = 199_000L;
+    private long proLifetimePriceVnd = 499_000L;
+    private String bankName = "Vietcombank (VCB)";
+    private String bankAccount = "1029384756";
+    private String bankHolder = "CONG TY JOBGOHUNTER";
 }
