@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-import vn.proy.jobgohunter.domain.InterviewSubscription;
 import vn.proy.jobgohunter.domain.request.interview.ReqCreateInterviewOrderDTO;
 import vn.proy.jobgohunter.domain.response.interview.ResInterviewOrderDTO;
 import vn.proy.jobgohunter.service.InterviewSubscriptionService;
@@ -50,7 +49,7 @@ public class InterviewSubscriptionController {
 
     @GetMapping("/orders/pending")
     @ApiMessage("List pending Pro orders (admin)")
-    public ResponseEntity<List<InterviewSubscription>> listPending() throws IdInvalidException {
-        return ResponseEntity.ok(subscriptionService.listPendingOrders());
+    public ResponseEntity<List<ResInterviewOrderDTO>> listPending() throws IdInvalidException {
+        return ResponseEntity.ok(subscriptionService.listPendingOrderDtos());
     }
 }

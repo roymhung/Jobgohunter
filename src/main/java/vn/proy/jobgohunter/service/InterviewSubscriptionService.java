@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -109,9 +110,18 @@ public class InterviewSubscriptionService {
         return toOrderDto(sub, email);
     }
 
-    public List<InterviewSubscription> listPendingOrders() throws IdInvalidException {
+    public List<ResInterviewOrderDTO> listPendingOrderDtos() throws IdInvalidException {
         requireSuperAdmin(requireUser());
-        return subscriptionRepository.findByStatusOrderByIdDesc(InterviewSubscriptionStatusEnum.PENDING);
+        return subscriptionRepository.findByStatusOrderByIdDesc(InterviewSubscriptionStatusEnum.PENDING).stream()
+                .map(sub -> {
+                    User owner = userRepository.findById(sub.getUserId()).orElse(null);
+                    String email = owner != null ? owner.getEmail() : "";
+                    ResInterviewOrderDTO dto = toOrderDto(sub, email);
+                    dto.setUserId(sub.getUserId());
+                    dto.setUserEmail(email);
+                    return dto;
+                })
+                .collect(Collectors.toList());
     }
 
     public Optional<InterviewSubscription> findPendingForUser(Long userId) {
