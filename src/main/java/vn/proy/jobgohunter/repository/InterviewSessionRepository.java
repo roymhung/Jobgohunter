@@ -10,6 +10,8 @@ import vn.proy.jobgohunter.util.enums.InterviewSessionStatusEnum;
 
 public interface InterviewSessionRepository extends JpaRepository<InterviewSession, String> {
 
+    long countByUserId(Long userId);
+
     Optional<InterviewSession> findByIdAndUserId(String id, Long userId);
 
     List<InterviewSession> findByUserIdAndStatusOrderBySubmittedAtDesc(

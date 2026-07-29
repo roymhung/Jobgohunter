@@ -6,6 +6,7 @@ public class ResInterviewMeDTO {
     private boolean proActive;
     private int freeSessionsLeft;
     private int freeSessionsTotal;
+    private int freeSessionsUsed;
     private List<ResInterviewHistoryItemDTO> recentSessions;
     private ResInterviewPendingOrderDTO pendingOrder;
 
@@ -31,6 +32,14 @@ public class ResInterviewMeDTO {
 
     public void setFreeSessionsTotal(int freeSessionsTotal) {
         this.freeSessionsTotal = freeSessionsTotal;
+    }
+
+    public int getFreeSessionsUsed() {
+        return freeSessionsUsed;
+    }
+
+    public void setFreeSessionsUsed(int freeSessionsUsed) {
+        this.freeSessionsUsed = freeSessionsUsed;
     }
 
     public List<ResInterviewHistoryItemDTO> getRecentSessions() {

@@ -35,8 +35,17 @@ public class OAuthUserService extends DefaultOAuth2UserService {
             return oauth2User;
         }
 
+        resolveOAuthUser(registrationId, oauth2User);
+        return oauth2User;
+    }
+
+    /**
+     * Tìm hoặc tạo user DB sau OAuth (dùng chung loadUser + success handler).
+     */
+    @Transactional
+    public User resolveOAuthUser(String registrationId, OAuth2User oauth2User) {
         AuthProvider provider = AuthProvider.fromRegistrationId(registrationId);
-        String providerId = String.valueOf(oauth2User.getName());
+        String providerId = resolveProviderId(registrationId, oauth2User);
         Map<String, Object> attributes = oauth2User.getAttributes();
 
         User user = userRepository.findByAuthProviderAndProviderId(provider, providerId);
@@ -51,7 +60,25 @@ public class OAuthUserService extends DefaultOAuth2UserService {
         } else {
             updateNameIfPresent(user, attributes);
         }
-        return oauth2User;
+        return user;
+    }
+
+    private String resolveProviderId(String registrationId, OAuth2User oauth2User) {
+        String fromName = oauth2User.getName();
+        if (fromName != null && !fromName.isBlank()) {
+            return String.valueOf(fromName);
+        }
+        Map<String, Object> attributes = oauth2User.getAttributes();
+        Object sub = attributes.get("sub");
+        if (sub != null) {
+            return String.valueOf(sub);
+        }
+        Object id = attributes.get("id");
+        if (id != null) {
+            return String.valueOf(id);
+        }
+        throw new OAuth2AuthenticationException(
+                "OAuth provider id missing for " + registrationId);
     }
 
     private User createOAuthUser(AuthProvider provider, String providerId, String email,

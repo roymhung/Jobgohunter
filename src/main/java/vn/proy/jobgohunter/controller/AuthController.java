@@ -43,6 +43,13 @@ public class AuthController {
     @Value("${jobgohunter.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
+    @Value("${jobgohunter.cookie.secure:true}")
+    private boolean refreshCookieSecure;
+
+    /** None = FE (4173) gọi BE (8080) vẫn gửi refresh cookie khi withCredentials. */
+    @Value("${jobgohunter.cookie.same-site:None}")
+    private String refreshCookieSameSite;
+
 
     public AuthController(AuthenticationManagerBuilder authenticationManagerBuilder,
             SecurityUtil securityUtil, UserService userService, PasswordEncoder passwordEncoder) {
@@ -50,6 +57,16 @@ public class AuthController {
         this.securityUtil = securityUtil;
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    private ResponseCookie buildRefreshCookie(String token, long maxAgeSeconds) {
+        return ResponseCookie.from("refresh_token", token)
+                .httpOnly(true)
+                .secure(refreshCookieSecure)
+                .path("/")
+                .sameSite(refreshCookieSameSite)
+                .maxAge(maxAgeSeconds)
+                .build();
     }
 
     @PostMapping("/auth/login")
@@ -88,8 +105,7 @@ public class AuthController {
         this.userService.updateUserToken(refresh_token, loginDTO.getUsername());
 
         // set cookies
-        ResponseCookie resCookie = ResponseCookie.from("refresh_token", refresh_token)
-                .httpOnly(true).secure(true).path("/").maxAge(refreshTokenExpiration).build();
+        ResponseCookie resCookie = buildRefreshCookie(refresh_token, refreshTokenExpiration);
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, resCookie.toString()).body(res);
     }
@@ -213,8 +229,7 @@ public class AuthController {
         this.userService.updateUserToken(new_refresh_token, email);
 
         // set cookies
-        ResponseCookie resCookie = ResponseCookie.from("refresh_token", new_refresh_token)
-                .httpOnly(true).secure(true).path("/").maxAge(refreshTokenExpiration).build();
+        ResponseCookie resCookie = buildRefreshCookie(new_refresh_token, refreshTokenExpiration);
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, resCookie.toString()).body(res);
     }
@@ -236,8 +251,7 @@ public class AuthController {
         this.userService.updateUserToken(null, email);
 
         // remove refresh token in cookies
-        ResponseCookie deleteSpringCookie = ResponseCookie.from("refresh_token", null)
-                .httpOnly(true).secure(true).path("/").maxAge(0).build();
+        ResponseCookie deleteSpringCookie = buildRefreshCookie("", 0);
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, deleteSpringCookie.toString())
                 .body(null);

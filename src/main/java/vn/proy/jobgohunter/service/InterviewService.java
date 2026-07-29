@@ -106,10 +106,18 @@ public class InterviewService {
         User user = requireUser();
         boolean pro = isProActive(user.getId());
         InterviewUserQuota quota = getOrCreateQuota(user.getId());
+        int total = props.getFreeSessions();
+        long usedCount = sessionRepository.countByUserId(user.getId());
+        int left = computeFreeSessionsLeft(usedCount, total);
+        if (!pro) {
+            quota.setFreeSessionsLeft(left);
+            quotaRepository.save(quota);
+        }
         ResInterviewMeDTO dto = new ResInterviewMeDTO();
         dto.setProActive(pro);
-        dto.setFreeSessionsLeft(quota.getFreeSessionsLeft());
-        dto.setFreeSessionsTotal(props.getFreeSessions());
+        dto.setFreeSessionsLeft(left);
+        dto.setFreeSessionsTotal(total);
+        dto.setFreeSessionsUsed((int) usedCount);
         dto.setRecentSessions(
                 sessionRepository
                         .findByUserIdAndStatusOrderBySubmittedAtDesc(user.getId(),
@@ -148,12 +156,10 @@ public class InterviewService {
         }
         boolean pro = isProActive(user.getId());
         if (!pro) {
-            InterviewUserQuota quota = getOrCreateQuota(user.getId());
-            if (quota.getFreeSessionsLeft() <= 0) {
+            long used = sessionRepository.countByUserId(user.getId());
+            if (used >= props.getFreeSessions()) {
                 throw new IdInvalidException("Đã hết lượt Free");
             }
-            quota.setFreeSessionsLeft(quota.getFreeSessionsLeft() - 1);
-            quotaRepository.save(quota);
         }
         int limit = pro ? props.getProQuestionsPerSession() : props.getFreeQuestionsPerSession();
         List<InterviewQuestion> picked = questionRepository.pickRandom(
@@ -187,6 +193,12 @@ public class InterviewService {
             ans.getId().setOrderIndex(i);
             ans.setSelectedIndex(null);
             sessionAnswerRepository.save(ans);
+        }
+        if (!pro) {
+            InterviewUserQuota quota = getOrCreateQuota(user.getId());
+            long used = sessionRepository.countByUserId(user.getId());
+            quota.setFreeSessionsLeft(computeFreeSessionsLeft(used, props.getFreeSessions()));
+            quotaRepository.save(quota);
         }
         return getSession(session.getId(), false);
     }
@@ -323,6 +335,10 @@ public class InterviewService {
         return subscriptionRepository
                 .findActiveForUser(userId, InterviewSubscriptionStatusEnum.ACTIVE)
                 .isPresent();
+    }
+
+    private int computeFreeSessionsLeft(long usedCount, int total) {
+        return (int) Math.max(0, total - usedCount);
     }
 
     private InterviewUserQuota getOrCreateQuota(Long userId) {

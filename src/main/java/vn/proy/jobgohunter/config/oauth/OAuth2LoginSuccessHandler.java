@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -15,9 +16,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import vn.proy.jobgohunter.domain.User;
-import vn.proy.jobgohunter.service.UserService;
 import vn.proy.jobgohunter.service.auth.AuthTokenService;
 import vn.proy.jobgohunter.service.auth.AuthTokenService.OAuthTokens;
+import vn.proy.jobgohunter.service.auth.OAuthUserService;
 import vn.proy.jobgohunter.util.enums.AuthProvider;
 
 @Component
@@ -25,13 +26,19 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
     private final OAuthClientProperties oauthClientProperties;
     private final AuthTokenService authTokenService;
-    private final UserService userService;
+    private final OAuthUserService oauthUserService;
+
+    @Value("${jobgohunter.cookie.secure:true}")
+    private boolean refreshCookieSecure;
+
+    @Value("${jobgohunter.cookie.same-site:None}")
+    private String refreshCookieSameSite;
 
     public OAuth2LoginSuccessHandler(OAuthClientProperties oauthClientProperties,
-            AuthTokenService authTokenService, UserService userService) {
+            AuthTokenService authTokenService, OAuthUserService oauthUserService) {
         this.oauthClientProperties = oauthClientProperties;
         this.authTokenService = authTokenService;
-        this.userService = userService;
+        this.oauthUserService = oauthUserService;
     }
 
     @Override
@@ -47,17 +54,25 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
             return;
         }
         OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-        AuthProvider provider = AuthProvider.fromRegistrationId(registrationId);
-        String providerId = String.valueOf(oauth2User.getName());
-        User user = userService.findByAuthProviderAndProviderId(provider, providerId);
+        User user;
+        try {
+            user = oauthUserService.resolveOAuthUser(registrationId, oauth2User);
+        } catch (Exception ex) {
+            redirectError(response, "user_not_found");
+            return;
+        }
         if (user == null) {
             redirectError(response, "user_not_found");
             return;
         }
         OAuthTokens tokens = authTokenService.issueTokensForUser(user);
         ResponseCookie cookie = ResponseCookie.from("refresh_token", tokens.refreshToken())
-                .httpOnly(true).secure(true).path("/")
-                .maxAge(authTokenService.refreshTokenMaxAgeSeconds()).build();
+                .httpOnly(true)
+                .secure(refreshCookieSecure)
+                .path("/")
+                .sameSite(refreshCookieSameSite)
+                .maxAge(authTokenService.refreshTokenMaxAgeSeconds())
+                .build();
         response.addHeader("Set-Cookie", cookie.toString());
         getRedirectStrategy().sendRedirect(request, response,
                 oauthClientProperties.frontendRedirectUrl() + "?access_token="
