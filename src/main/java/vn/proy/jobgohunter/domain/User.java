@@ -23,6 +23,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import vn.proy.jobgohunter.util.SecurityUtil;
+import vn.proy.jobgohunter.util.enums.AuthProvider;
 import vn.proy.jobgohunter.util.enums.GenderEnum;
 
 @Table(name = "users")
@@ -71,6 +72,11 @@ public class User {
     @JoinColumn(name = "role_id")
     private Role role;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AuthProvider authProvider = AuthProvider.LOCAL;
+
+    private String providerId;
 
     @PrePersist
     public void handleBeforeCreate() {

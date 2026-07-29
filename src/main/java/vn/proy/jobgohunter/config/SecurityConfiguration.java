@@ -24,6 +24,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
 
+import vn.proy.jobgohunter.config.oauth.OAuth2LoginFailureHandler;
+import vn.proy.jobgohunter.config.oauth.OAuth2LoginSuccessHandler;
+import vn.proy.jobgohunter.service.auth.OAuthUserService;
 import vn.proy.jobgohunter.util.SecurityUtil;
 
 @Configuration
@@ -43,11 +46,17 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(
             HttpSecurity http,
-            CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
+            CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+            OAuthUserService oAuthUserService,
+            OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
+            OAuth2LoginFailureHandler oAuth2LoginFailureHandler) throws Exception {
 
         String[] whiteList = {
                 "/",
                 "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register",
+                "/api/v1/auth/oauth/**",
+                "/oauth2/**",
+                "/login/oauth2/**",
                 "/storage/**",
                 "/api/v1/companies/**", "/api/v1/jobs/**",
                 "/api/v1/email/**", 
@@ -75,7 +84,12 @@ public class SecurityConfiguration {
                 // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
 
                 .formLogin(f -> f.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(u -> u.userService(oAuthUserService))
+                        .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
 
         return http.build();
     }

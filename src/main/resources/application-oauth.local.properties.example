@@ -1,0 +1,12 @@
+# Copy -> application-oauth.local.properties (gitignore, KHONG commit)
+# Google/GitHub/Facebook Authorized redirect (BE): http://localhost:8080/login/oauth2/code/{provider}
+# Override FE callback nếu cần: jobgohunter.oauth2.frontend-redirect-url=http://localhost:4173/login/oauth/callback
+
+spring.security.oauth2.client.registration.google.client-id=your-id.apps.googleusercontent.com
+spring.security.oauth2.client.registration.google.client-secret=GOCSPX-your-secret
+
+spring.security.oauth2.client.registration.github.client-id=your-github-client-id
+spring.security.oauth2.client.registration.github.client-secret=your-github-client-secret
+
+spring.security.oauth2.client.registration.facebook.client-id=your-facebook-app-id
+spring.security.oauth2.client.registration.facebook.client-secret=your-facebook-app-secret

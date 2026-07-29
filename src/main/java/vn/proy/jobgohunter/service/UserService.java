@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import vn.proy.jobgohunter.domain.Company;
 import vn.proy.jobgohunter.domain.Role;
 import vn.proy.jobgohunter.domain.User;
+import vn.proy.jobgohunter.util.enums.AuthProvider;
 import vn.proy.jobgohunter.domain.response.ResCreateUserDTO;
 import vn.proy.jobgohunter.domain.response.ResUpdateUserDTO;
 import vn.proy.jobgohunter.domain.response.ResUserDTO;
@@ -218,5 +219,9 @@ public class UserService {
     // Bổ sung hàm này nếu chưa có
     public boolean isEmailExist(String email) {
         return this.userRepository.existsByEmail(email);
+    }
+
+    public User findByAuthProviderAndProviderId(AuthProvider authProvider, String providerId) {
+        return this.userRepository.findByAuthProviderAndProviderId(authProvider, providerId);
     }
 }
