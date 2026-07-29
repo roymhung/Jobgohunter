@@ -58,6 +58,7 @@ public class InterviewService {
     private final InterviewSessionAnswerRepository sessionAnswerRepository;
     private final InterviewUserQuotaRepository quotaRepository;
     private final InterviewSubscriptionRepository subscriptionRepository;
+    private final InterviewSubscriptionService subscriptionService;
 
     public InterviewService(
             InterviewProperties props,
@@ -69,7 +70,8 @@ public class InterviewService {
             InterviewSessionQuestionRepository sessionQuestionRepository,
             InterviewSessionAnswerRepository sessionAnswerRepository,
             InterviewUserQuotaRepository quotaRepository,
-            InterviewSubscriptionRepository subscriptionRepository) {
+            InterviewSubscriptionRepository subscriptionRepository,
+            InterviewSubscriptionService subscriptionService) {
         this.props = props;
         this.objectMapper = objectMapper;
         this.userService = userService;
@@ -80,6 +82,7 @@ public class InterviewService {
         this.sessionAnswerRepository = sessionAnswerRepository;
         this.quotaRepository = quotaRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.subscriptionService = subscriptionService;
     }
 
     public ResInterviewConfigDTO getConfig() {
@@ -122,6 +125,9 @@ public class InterviewService {
                             return h;
                         })
                         .collect(Collectors.toList()));
+        subscriptionService.findPendingForUser(user.getId())
+                .map(subscriptionService::mapPending)
+                .ifPresent(dto::setPendingOrder);
         return dto;
     }
 
