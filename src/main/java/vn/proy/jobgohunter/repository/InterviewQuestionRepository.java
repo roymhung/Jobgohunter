@@ -2,6 +2,7 @@ package vn.proy.jobgohunter.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,11 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
             @Param("questionType") String questionType,
             @Param("level") String level,
             Pageable pageable);
+
+    @Query("""
+            SELECT q FROM InterviewQuestion q
+            WHERE (:topicCode IS NULL OR :topicCode = '' OR q.topicCode = :topicCode)
+            ORDER BY q.id DESC
+            """)
+    Page<InterviewQuestion> adminSearch(@Param("topicCode") String topicCode, Pageable pageable);
 }
