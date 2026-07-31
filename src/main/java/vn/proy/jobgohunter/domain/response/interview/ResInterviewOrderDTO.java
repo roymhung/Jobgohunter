@@ -2,6 +2,7 @@ package vn.proy.jobgohunter.domain.response.interview;
 
 import java.time.Instant;
 
+import vn.proy.jobgohunter.util.enums.InterviewPaymentMethodEnum;
 import vn.proy.jobgohunter.util.enums.InterviewSubscriptionPlanEnum;
 import vn.proy.jobgohunter.util.enums.InterviewSubscriptionStatusEnum;
 
@@ -18,6 +19,9 @@ public class ResInterviewOrderDTO {
     private Instant transferSubmittedAt;
     private Long userId;
     private String userEmail;
+    private InterviewPaymentMethodEnum paymentMethod;
+    private Instant paidAt;
+    private boolean vnpayEnabled;
 
     public Long getId() {
         return id;
@@ -103,4 +107,10 @@ public class ResInterviewOrderDTO {
     public void setUserId(Long userId) { this.userId = userId; }
     public String getUserEmail() { return userEmail; }
     public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+    public InterviewPaymentMethodEnum getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(InterviewPaymentMethodEnum paymentMethod) { this.paymentMethod = paymentMethod; }
+    public Instant getPaidAt() { return paidAt; }
+    public void setPaidAt(Instant paidAt) { this.paidAt = paidAt; }
+    public boolean isVnpayEnabled() { return vnpayEnabled; }
+    public void setVnpayEnabled(boolean vnpayEnabled) { this.vnpayEnabled = vnpayEnabled; }
 }

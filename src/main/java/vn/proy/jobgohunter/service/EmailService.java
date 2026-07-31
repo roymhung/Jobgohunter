@@ -83,6 +83,20 @@ public class EmailService {
         this.sendEmailSync(to, "Job Hunter — Đặt lại mật khẩu", content, false, true);
     }
 
-
+    public void sendPaymentSuccessEmail(
+            String to, String name, String planLabel, long amountVnd, String paymentMethod, Long orderId) {
+        try {
+            Context context = new Context();
+            context.setVariable("name", name != null && !name.isBlank() ? name : "bạn");
+            context.setVariable("planLabel", planLabel);
+            context.setVariable("amountVnd", String.format("%,d", amountVnd));
+            context.setVariable("paymentMethod", paymentMethod);
+            context.setVariable("orderId", "#" + orderId);
+            String content = templateEngine.process("payment-success", context);
+            this.sendEmailSync(to, "JobGoHunter — Thanh toán Pro thành công", content, false, true);
+        } catch (RuntimeException e) {
+            System.err.println("WARN: payment success email failed for " + to + ": " + e.getMessage());
+        }
+    }
 
 }

@@ -62,7 +62,8 @@ public class SecurityConfiguration {
                 "/storage/**",
                 "/api/v1/companies/**", "/api/v1/jobs/**",
                 "/api/v1/interview/config", "/api/v1/interview/topics",
-                "/api/v1/email/**", 
+                "/api/v1/payments/vnpay/return", "/api/v1/payments/vnpay/ipn",
+                "/api/v1/email/**",
                 "/v3/api-docs/**",
                 "/swagger-ui/**",
                 "/swagger-ui.html"

@@ -1,0 +1,22 @@
+# =============================================================================
+# VNPay SANDBOX — BẮT BUỘC đăng ký merchant riêng (key DEMOV210 đã hết hạn)
+# =============================================================================
+# 1. Đăng ký: https://sandbox.vnpayment.vn/devreg/
+#    - Tên merchant: jobgohunter
+#    - URL (không dùng localhost): https://jobgohunter.com  hoặc URL ngrok
+#    - Kích hoạt qua email → nhận TMN Code + Hash Secret
+#
+# 2. Copy file này thành: application-vnpay.local.properties
+#
+# 3. Bỏ comment và điền key của bạn:
+#
+# jobgohunter.vnpay.tmn-code=YKNG66EM
+# jobgohunter.vnpay.hash-secret=VMHGUOMYUREJZRPBEMXRGRLRQEYKXKMA
+#
+# 4. Return URL — phải khớp URL đã khai báo trên portal VNPay.
+#    Dev local: chạy ngrok http 8080 → dùng URL ngrok:
+#
+# jobgohunter.vnpay.return-url=https://jobgohunter.com/api/v1/payments/vnpay/return
+# jobgohunter.vnpay.ipn-url=https://jobgohunter.com/api/v1/payments/vnpay/ipn
+#
+# 5. Restart backend sau khi lưu file.

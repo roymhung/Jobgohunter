@@ -1,5 +1,6 @@
 HELP.md
 **/application-oauth.local.properties
+**/application-vnpay.local.properties
 .gradle
 build/
 !gradle/wrapper/gradle-wrapper.jar

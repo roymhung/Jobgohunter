@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Thanh toán thành công</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a;">
+<p>Xin chào <strong th:text="${name}">User</strong>,</p>
+<p>Cảm ơn bạn đã thanh toán gói <strong th:text="${planLabel}">Pro</strong> trên JobGoHunter.</p>
+<ul>
+    <li>Số tiền: <strong th:text="${amountVnd} + ' VND'">0 VND</strong></li>
+    <li>Phương thức: <span th:text="${paymentMethod}">MoMo</span></li>
+    <li>Mã đơn: <span th:text="${orderId}">#1</span></li>
+</ul>
+<p>Gói Pro đã được <strong>kích hoạt tự động</strong> trên tài khoản của bạn. Bạn có thể luyện phỏng vấn không giới hạn ngay bây giờ.</p>
+<p style="font-size:12px;color:#64748b;">Email tự động — vui lòng không trả lời.</p>
+</body>
+</html>

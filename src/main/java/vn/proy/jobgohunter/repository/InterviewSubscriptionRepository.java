@@ -26,5 +26,7 @@ public interface InterviewSubscriptionRepository extends JpaRepository<Interview
 
     Optional<InterviewSubscription> findByIdAndUserId(Long id, Long userId);
 
+    Optional<InterviewSubscription> findByVnpayTxnRef(String vnpayTxnRef);
+
     List<InterviewSubscription> findByStatusOrderByIdDesc(InterviewSubscriptionStatusEnum status);
 }

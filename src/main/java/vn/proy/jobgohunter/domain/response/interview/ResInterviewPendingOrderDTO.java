@@ -1,5 +1,6 @@
 package vn.proy.jobgohunter.domain.response.interview;
 
+import vn.proy.jobgohunter.util.enums.InterviewPaymentMethodEnum;
 import vn.proy.jobgohunter.util.enums.InterviewSubscriptionPlanEnum;
 import vn.proy.jobgohunter.util.enums.InterviewSubscriptionStatusEnum;
 
@@ -8,6 +9,7 @@ public class ResInterviewPendingOrderDTO {
     private InterviewSubscriptionPlanEnum planCode;
     private InterviewSubscriptionStatusEnum status;
     private boolean transferSubmitted;
+    private InterviewPaymentMethodEnum paymentMethod;
 
     public Long getId() {
         return id;
@@ -39,5 +41,13 @@ public class ResInterviewPendingOrderDTO {
 
     public void setTransferSubmitted(boolean transferSubmitted) {
         this.transferSubmitted = transferSubmitted;
+    }
+
+    public InterviewPaymentMethodEnum getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(InterviewPaymentMethodEnum paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }
